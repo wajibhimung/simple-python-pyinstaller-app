@@ -32,7 +32,14 @@ pipeline {
             }
         }
 
-        stage('Deliver') { 
+        stage('Manual Approval ') {
+            steps {
+                input message: 'Lanjutkan ke tahap Deploy? (Klik "Proceed" untuk melanjutkan ke tahap deploy)'
+                
+            }
+        }
+
+        stage('Deploy') { 
             agent any
             environment { 
                 VOLUME = '$(pwd)/sources:/src'
@@ -46,7 +53,9 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals" 
+                    archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals"
+                    echo "Jeda 1 menit untuk uji coba aplikasi" 
+                    sleep(time:1,unit:"MINUTES")
                     sh "docker run --rm -v ${VOLUME} ${IMAGE} 'rm -rf build dist'"
                 }
             }
